@@ -1,21 +1,54 @@
+"""
+@gitsil10
+@version 1.0
+@date 2024-03-24
+@file merge_pdf.py
+@brief merge pdfs in the in directory
+@usage python merge_pdf.py <result-file>
+@note result-file is optional
+
+@dependencies
+pypdf -> pdfwriter
+pdfwriter -> append | write
+
+os -> path | remove | exists
+sys -> argv
+
+@details
+This script merges all pdfs in the in directory
+and writes the merged pdf to the out directory
+with the name result.pdf or <result-file>.pdf
+"""
+
 #imports
-from pypdf import PdfMerger
-import os
+from pypdf import PdfWriter
+from sys import argv
+from os import path, remove, getcwd, listdir
 
 #input
-result:str = sys.argv[1] if len(sys.argv == 2) else "result"
+result:tuple = (argv[1] if len(argv) == 2 else "result",)
+result = result[0]
 
 #files in dir
-files = os.listdir(os.getcwd())
-pdfs = [f for f in files if f.endswith(".pdf")]
+in_path, out_path = f"{getcwd()}/in", f"{getcwd()}/out/{result}.pdf"
+files = listdir(in_path)
+pdfs = sorted([f for f in files if f.endswith(".pdf")])
 print(f"pdfs in dir to merge\n{pdfs}")
 
-#start merger
-merger = PdfMerger()
-for pdf in pdfs:
-    merger.append(pdf)
+#delete existing file
+if path.exists(out_path):
+    remove(out_path)
+    print(f"file {result}.pdf exists\noverwriting file...")
+else:
+    print(f"file does not exist\ncreating new file as {result}.pdf...")
 
-#merger action
-merger.write(f"{result}.pdf")
-merger.close()
-
+with PdfWriter() as writer:
+    if len(pdfs) > 0:
+        #start merging
+        for pdf in pdfs:
+            writer.append(f"{in_path}/{pdf}")
+            
+        #merger action
+        writer.write(out_path)
+    else:
+        print("no pdfs to merge")
