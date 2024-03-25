@@ -2,7 +2,7 @@
 .venv
 
 #input
-/in
+in
 
 #output
-/out
+out
